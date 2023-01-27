@@ -1,28 +1,36 @@
 #include <iostream>
 #include <vector>
 #include <utility>
+#include <algorithm>
 
 using namespace std;
 
 
 class Poly {
     public:
+        // coefficients a0, ..., an; for a_0 + a_1*x + ... + a_n*x
+        vector<long long int> coeffs;
         // ctors
-        Poly() : coeffs{0} {}
-        Poly(int a_0) : coeffs{a_0} {}
+        Poly() { coeffs = { 0 }; }
+        Poly(long long int a_0, bool is_size) {
+            if (is_size) {
+                vector<long long int> v(a_0, 0);
+                coeffs = v;
+            } else {
+                coeffs = {a_0};
+            }
+        }
+
 
 
         // The Rule of 5
         // copy ctor
         Poly(Poly &other) {
-            cout << "COPY CTOR" << endl;
-
             coeffs.clear();
             coeffs = other.coeffs;
         }
         // copy assignment
         Poly &operator=(const Poly &rhs) {
-            cout << "COPY ASSIGN" << endl;
             if (this == &rhs) return *this;
             coeffs.clear();
             coeffs = rhs.coeffs;
@@ -30,22 +38,17 @@ class Poly {
         }
         // move ctor
         Poly(Poly &&other) {
-            cout << "MOVE CTOR" << endl;
             coeffs.clear();
             coeffs = move(other.coeffs);
         }
         // move assignment
         Poly &operator=(Poly &&rhs) {
-            cout << "MOVE ASSIGN" << endl;
             coeffs.clear();
             coeffs = move(rhs.coeffs);
             return *this;
         }
         // dtor
         ~Poly() {}
-
-        // coefficients a0, ..., an; for a_0 + a_1*x + ... + a_n*x
-        vector<long long int> coeffs;
 
         // Shift coeffs to start at index i
         Poly shift(int i) const {
@@ -104,20 +107,32 @@ class Poly {
 
         // requires coeffs.size() == rhs.coeffs.size()
         Poly operator+(const Poly &rhs) const {
-            Poly result{coeffs[0] + rhs.coeffs[0]};
-            int l = coeffs.size();
+            Poly result{coeffs[0] + rhs.coeffs[0], false};
+            int l = max(coeffs.size(), rhs.coeffs.size());
             for (int i = 1; i < l; ++i) {
-                result.coeffs.push_back(coeffs[i] + rhs.coeffs[i]);
+                if (i > coeffs.size()) {
+                    result.coeffs.push_back(rhs.coeffs[i]);
+                } else if (i > rhs.coeffs.size()) {
+                    result.coeffs.push_back(coeffs[i]);
+                } else {
+                    result.coeffs.push_back(coeffs[i] + rhs.coeffs[i]);
+                }
             }
             return result;
         }
 
         // requires coeffs.size() == rhs.coeffs.size()
         Poly operator-(const Poly &rhs) const {
-            Poly result{coeffs[0] - rhs.coeffs[0]};
-            int l = coeffs.size();
+            Poly result{coeffs[0] - rhs.coeffs[0], false};
+            int l = max(coeffs.size(), rhs.coeffs.size());
             for (int i = 1; i < l; ++i) {
-                result.coeffs.push_back(coeffs[i] - rhs.coeffs[i]);
+                if (i > coeffs.size()) {
+                    result.coeffs.push_back(-1 * rhs.coeffs[i]);
+                } else if (i > rhs.coeffs.size()) {
+                    result.coeffs.push_back(coeffs[i]);
+                } else {
+                    result.coeffs.push_back(coeffs[i] - rhs.coeffs[i]);
+                }
             }
             return result;
         }
@@ -125,9 +140,18 @@ class Poly {
         // Karatsuba
         //  requires coeffs.size() == rhs.coeffs.size()
         Poly operator*(const Poly &rhs) const {
-            // base case: degree 0
-            if (coeffs.size() == 1) {
-                Poly result{coeffs[0] * rhs.coeffs[0]};
+            // base case: degree <= 11
+            // brute force is faster than karatsuba for small enough deg
+            if (coeffs.size() <= 1 or rhs.coeffs.size() <= 1) {
+                long long int s = coeffs.size() + rhs.coeffs.size() - 1;
+                Poly result{s, true};
+                int l = max(coeffs.size(), rhs.coeffs.size());
+                for (int i = 0; i < coeffs.size(); ++i) {
+                    for (int j = 0; j <  rhs.coeffs.size(); ++j) {
+                        // cout << "I: " << i << " J: " << j
+                        result.coeffs[i + j] += coeffs[i] * rhs.coeffs[j];
+                    }
+                }
                 return result;
             }
 
@@ -135,24 +159,24 @@ class Poly {
             int shift_amount = split(a1, a2);
             rhs.split(b1, b2); // rhs should give the same shift_amount
 
-            cout << "a1: " << endl;
-            a1.print();
-            cout << "a2: " << endl;
-            a2.print();
-            cout << "b1: " << endl;
-            b1.print();
-            cout << "b2: " << endl;
-            b2.print();
+            // cout << "a1: " << endl;
+            // a1.print();
+            // cout << "a2: " << endl;
+            // a2.print();
+            // cout << "b1: " << endl;
+            // b1.print();
+            // cout << "b2: " << endl;
+            // b2.print();
 
             Poly a1_b1 = a1 * b1;
-            cout << "a1_b1: " << endl;
-            a1_b1.print();
+            // cout << "a1_b1: " << endl;
+            // a1_b1.print();
             Poly a2_b2 = a2 * b2;
-            cout << "a2_b2: " << endl;
-            a2_b2.print();
+            // cout << "a2_b2: " << endl;
+            // a2_b2.print();
             Poly a12_b12 = (a1 + a2) * (b1 + b2);
-            cout << "a12_b12: " << endl;
-            a12_b12.print();
+            // cout << "a12_b12: " << endl;
+            // a12_b12.print();
 
             return a1_b1 + 
                    (a12_b12 - a1_b1 - a2_b2).shift(shift_amount) + 
@@ -188,25 +212,25 @@ int main() {
         }
     }
 
-    cout << "a:" << endl;
-    a.print();
-    Poly x1;
-    Poly x2;
-    a.split(x1, x2);
-    cout << "x1:" << endl;
-    x1.print();
-    cout << "x2:" << endl;
-    x2.print();
-    cout << "a*x^2:" << endl;
-    a.shift(2).print();
-    cout << "b:" << endl;
-    b.print(); 
-    cout << "a + b: " << endl;
-    (a + b).print();
-    cout << "a - b: " << endl;
-    (a - b).print();
+    // cout << "a:" << endl;
+    // a.print();
+    // Poly x1;
+    // Poly x2;
+    // a.split(x1, x2);
+    // cout << "x1:" << endl;
+    // x1.print();
+    // cout << "x2:" << endl;
+    // x2.print();
+    // cout << "a*x^2:" << endl;
+    // a.shift(2).print();
+    // cout << "b:" << endl;
+    // b.print(); 
+    // cout << "a + b: " << endl;
+    // (a + b).print();
+    // cout << "a - b: " << endl;
+    // (a - b).print();
 
-    cout << "a * b: " << endl;
+    // cout << "a * b: " << endl;
     (a * b).print();
 
 
