@@ -1,10 +1,17 @@
 #include <iostream>
 #include <queue>
 #include <cstring> // for memset
+#include <string>
+#include <sstream>
+#include <map>
 
 using namespace std;
 
 // option, add parent pointer attribute instead of parent 
+// OR
+// create a wrapper struct where to have a stack variable parent;
+
+struct four_tuple;
 
 struct four_tuple {
     int arr[4];
@@ -15,6 +22,15 @@ struct four_tuple {
             arr[i] = rhs.arr[i];
         }
         return *this;
+    }
+
+    string to_str() {
+        stringstream ss;
+        for (int i = 0; i < 4; ++i) {
+            ss << arr[i];
+            ss << "_"; // separator to distinguish things like {1, 11} == {11, 1} == "111" altho i dont think this is possible here
+        }
+        return ss.str();
     }
 
     void print() {
@@ -39,18 +55,25 @@ int main() {
     for (int i = 0; i < 4; ++i) cin >> S.arr[i]; // read S
     for (int i = 0; i < 4; ++i) cin >> T.arr[i]; // read T
 
+    cout << "READ IN" << endl;
+
 
     // add 1 to indices since S is 1-indexed
-    int visited[n-2][n-1][n][n+1];
+
+    // int visited[n-2][n-1][n][n+1];
+    map<string, bool> visited;
+
     // int dist[n-2][n-1][n][n+1];
-    four_tuple parent[n-2][n-1][n][n+1];
+    // four_tuple parent[n-2][n-1][n][n+1];
+    map<string, four_tuple> parent;
     queue<four_tuple> q;
     
-
-    memset(visited, 0, sizeof(visited)); // visited[v] = false
+    // memset(visited, 0, sizeof(visited)); // visited[v] = false
     // dist[S.arr[0]][S.arr[1]][S.arr[2]][S.arr[3]] = 0; // dist[s] = 0
     S.dist = 0;
-    visited[S.arr[0]][S.arr[1]][S.arr[2]][S.arr[3]] = 1; // visited[s] = true
+
+    // visited[S.arr[0]][S.arr[1]][S.arr[2]][S.arr[3]] = 1; // visited[s] = true
+    visited[S.to_str()] = true;
     q.push(S); 
 
     cout << "starting while" << endl;
@@ -84,11 +107,15 @@ int main() {
                     if (neighbor.arr[j] != T.arr[j]) is_T = false;
                 }
                 neighbor.dist = cur.dist + 1;
+                string s = neighbor.to_str();
 
-                if (!visited[neighbor.arr[0]][neighbor.arr[1]][neighbor.arr[2]][neighbor.arr[3]]) {
-                    // cout << "SHIFT LEFT stack push (i = " << i << "), neighbor: ";
-                    // neighbor.print();
-                    parent[neighbor.arr[0]][neighbor.arr[1]][neighbor.arr[2]][neighbor.arr[3]] = cur;
+                // if (!visited[neighbor.arr[0]][neighbor.arr[1]][neighbor.arr[2]][neighbor.arr[3]]) {
+                if (!visited.count(s) or !visited[s]) { // count == 0 // logn
+                    cout << "SHIFT LEFT stack push (i = " << i << "), neighbor: ";
+                    neighbor.print();
+                    // parent[neighbor.arr[0]][neighbor.arr[1]][neighbor.arr[2]][neighbor.arr[3]] = cur;
+                    // neighbor.parent = cur;
+                    parent[s] = cur;
 
                     if (is_T) {
                         T.dist = cur.dist + 1;
@@ -96,7 +123,8 @@ int main() {
                         break;
                     }
 
-                    visited[neighbor.arr[0]][neighbor.arr[1]][neighbor.arr[2]][neighbor.arr[3]] = 1;
+                    // visited[neighbor.arr[0]][neighbor.arr[1]][neighbor.arr[2]][neighbor.arr[3]] = 1;
+                    visited[s] = true;
                     q.push(neighbor);
                 }
             }
@@ -115,19 +143,23 @@ int main() {
                     if (neighbor.arr[j] != T.arr[j]) is_T = false;
                 }
                 neighbor.dist = cur.dist + 1;
+                string s = neighbor.to_str();
 
-                if (!visited[neighbor.arr[0]][neighbor.arr[1]][neighbor.arr[2]][neighbor.arr[3]]) {
-                    // cout << "SHIFT RIGHT stack push (i = " << i << "), neighbor: ";
-                    // neighbor.print();
-                    parent[neighbor.arr[0]][neighbor.arr[1]][neighbor.arr[2]][neighbor.arr[3]] = cur;
-
+                // if (!visited[neighbor.arr[0]][neighbor.arr[1]][neighbor.arr[2]][neighbor.arr[3]]) {
+                if (!visited.count(s) or !visited[s]) { // count == 0 // logn
+                    cout << "SHIFT RIGHT stack push (i = " << i << "), neighbor: ";
+                    neighbor.print();
+                    // parent[neighbor.arr[0]][neighbor.arr[1]][neighbor.arr[2]][neighbor.arr[3]] = cur;
+                    // neighbor.parent = cur;
+                    parent[s] = cur;
                     if (is_T) {
                         T.dist = cur.dist + 1;
                         done = true;
                         break;
                     }
 
-                    visited[neighbor.arr[0]][neighbor.arr[1]][neighbor.arr[2]][neighbor.arr[3]] = 1;
+                    // visited[neighbor.arr[0]][neighbor.arr[1]][neighbor.arr[2]][neighbor.arr[3]] = 1;
+                    visited[s] = true;
                     q.push(neighbor);
                 }
             }
@@ -154,19 +186,23 @@ int main() {
                     if (neighbor.arr[j] != T.arr[j]) is_T = false;
                 }
                 neighbor.dist = cur.dist + 1;
+                string s = neighbor.to_str();
 
-                if (!visited[neighbor.arr[0]][neighbor.arr[1]][neighbor.arr[2]][neighbor.arr[3]]) {
-                    // cout << "REFLECT LEFT stack push (i = " << i << "), neighbor: ";
-                    // neighbor.print();
-                    parent[neighbor.arr[0]][neighbor.arr[1]][neighbor.arr[2]][neighbor.arr[3]] = cur;
-
+                // if (!visited[neighbor.arr[0]][neighbor.arr[1]][neighbor.arr[2]][neighbor.arr[3]]) {
+                if (!visited.count(s) or !visited[s]) { // count == 0 // logn
+                    cout << "REFLECT LEFT stack push (i = " << i << "), neighbor: ";
+                    neighbor.print();
+                    // parent[neighbor.arr[0]][neighbor.arr[1]][neighbor.arr[2]][neighbor.arr[3]] = cur;
+                    // neighbor.parent = cur;
+                    parent[s] = cur;
                     if (is_T) {
                         T.dist = cur.dist + 1;
                         done = true;
                         break;
                     }
 
-                    visited[neighbor.arr[0]][neighbor.arr[1]][neighbor.arr[2]][neighbor.arr[3]] = 1;
+                    // visited[neighbor.arr[0]][neighbor.arr[1]][neighbor.arr[2]][neighbor.arr[3]] = 1;
+                    visited[s] = true;
                     q.push(neighbor);
                 }
             }
@@ -195,26 +231,30 @@ int main() {
                     if (neighbor.arr[j] != T.arr[j]) is_T = false;
                 }
                 neighbor.dist = cur.dist + 1;
+                string s = neighbor.to_str();
 
-                if (!visited[neighbor.arr[0]][neighbor.arr[1]][neighbor.arr[2]][neighbor.arr[3]]) {
-                    // cout << "REFLECT RIGHT stack push (i = " << i << "), neighbor: ";
-                    // neighbor.print();
-                    parent[neighbor.arr[0]][neighbor.arr[1]][neighbor.arr[2]][neighbor.arr[3]] = cur;
-
+                // if (!visited[neighbor.arr[0]][neighbor.arr[1]][neighbor.arr[2]][neighbor.arr[3]]) {
+                if (!visited.count(s) or !visited[s]) { // count == 0 // logn
+                    cout << "REFLECT RIGHT stack push (i = " << i << "), neighbor: ";
+                    neighbor.print();
+                    // parent[neighbor.arr[0]][neighbor.arr[1]][neighbor.arr[2]][neighbor.arr[3]] = cur;
+                    // neighbor.parent = cur;
+                    parent[s] = cur;
                     if (is_T) {
                         T.dist = cur.dist + 1;
                         done = true;
                         break;
                     }
 
-                    visited[neighbor.arr[0]][neighbor.arr[1]][neighbor.arr[2]][neighbor.arr[3]] = 1;
+                    // visited[neighbor.arr[0]][neighbor.arr[1]][neighbor.arr[2]][neighbor.arr[3]] = 1;
+                    visited[s] = true;
                     q.push(neighbor);
                 }
             }
         }
     }
 
-    // cout << "GOT THROUGH WHILE " << endl;
+    cout << "GOT THROUGH WHILE " << endl;
 
 
     // Print result;
@@ -227,7 +267,17 @@ int main() {
     four_tuple cur = T;
     for (int i = 0; i < T.dist + 1; ++i) {
         stack[i] = cur;
-        cur = parent[cur.arr[0]][cur.arr[1]][cur.arr[2]][cur.arr[3]];
+        // cur = parent[cur.arr[0]][cur.arr[1]][cur.arr[2]][cur.arr[3]];
+        // cur = cur.parent;
+        cur = parent[cur.to_str()];
+
+
+
+        // cout << "cur.parent: ";
+        // cur.print();
+
+
+
     }
 
     // print from stack
