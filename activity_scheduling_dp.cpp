@@ -116,15 +116,21 @@ int main() {
 
             // dp[i][E] = max(do_i, dont_do_i);
             if (do_i >= dont_do_i) {
+                Triple t;
+                t.include_current = true;
+                t.parent_i = next[i];
+                t.parent_E = next[i] <= N ? E - intervals[i].E + (intervals[next[i]].S - intervals[i].T) : 0;
                 dp[i + E * (N+1)] = pair<int, int>{do_i_K, do_i};
-                Triple t = {next[i], E - intervals[i].E + (intervals[next[i]].S - intervals[i].T), true};
                 par[i + E * (N+1)] = t;//Triple();
                 // par[i + E * (N+1)].include_current = true;
                 // par[i + E * (N+1)].parent_i = next[i];
                 // par[i + E * (N+1)].parent_E = E - intervals[i].E + (intervals[next[i]].S - intervals[i].T);
             } else {
                 dp[i + E * (N+1)] = pair<int, int>{dont_do_i_K, dont_do_i};
-                Triple t = {i+1, E + intervals[i+1].S - intervals[i].S, false};
+                Triple t;
+                t.include_current = false;
+                t.parent_i = i+1;
+                t.parent_E = i+1 <= N ? E + intervals[i+1].S - intervals[i].S : 0;
                 par[i + E * (N+1)] = t;//Triple();
                 // par[i + E * (N+1)].include_current = false;
                 // par[i + E * (N+1)].parent_i = i+1;
@@ -138,6 +144,16 @@ int main() {
     int V = dp[1 + M * (N+1)].second; // dp[1][M]
     cout << K << " " << V << endl;
 
-
-
+    int cur_i = 1;
+    int cur_E = M;
+    while (cur_i <= N) {
+        int new_i = par[cur_i + cur_E * (N+1)].parent_i;
+        int new_E = par[cur_i + cur_E * (N+1)].parent_E;
+        if (par[cur_i + cur_E * (N+1)].include_current) {
+            cout << cur_i;
+            --K;
+            if (K > 0) cout << " ";
+        }
+    }
+    cout << endl;
 }
