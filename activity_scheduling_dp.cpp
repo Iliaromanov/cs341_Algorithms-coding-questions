@@ -8,6 +8,7 @@ using namespace std;
 
 struct Activity {
     int S; int T; int V; int E;
+    int initial_i; // the i at which its read in (for printing at the end)
 };
 
 struct Triple {
@@ -45,13 +46,43 @@ int main() {
     for (int i = 1; i <= N; ++i) { // intervals is 1 indexed
         intervals[i] = Activity();
         cin >> intervals[i].S >> intervals[i].T >> intervals[i].V >> intervals[i].E;
+        intervals[i].initial_i = i;
     }
 
-    int len = sizeof(intervals) / sizeof(intervals[0]);
-    sort(intervals+1, intervals + len, activityLeq); // sort by non-decreasing start time
+
+
+
+    // TEST
+    // cout << "unsorted:" <<endl;
+    // for (int i = 1; i <= N; ++i) {
+    //     cout << "S: " << intervals[i].S << " T: " << intervals[i].T << " V: " << intervals[i].V << " E: " << intervals[i].E << endl;
+    // }
+
+    //
+
+
+
+
+    sort(intervals+1, intervals + N + 1, activityLeq); // sort by non-decreasing start time
+
+
+
+
+
+    // cout << "sorted:" <<endl;
+    // for (int i = 1; i <= N; ++i) {
+    //     cout << "S: " << intervals[i].S << " T: " << intervals[i].T << " V: " << intervals[i].V << " E: " << intervals[i].E << endl;
+    // }
+
+
+
 
     int next[N+1]; // next is 1 indexed
     next[N] = N+1;
+
+
+    // cout << "N: " << N << endl;
+
 
     // populating next array
     for (int i = 1; i < N; ++i) {
@@ -60,12 +91,23 @@ int main() {
         // optimization for when interval finishes 
         //  after all other intervals
         if (intervals[r].S < intervals[i].T) {
-            next[i] = N+1; 
+            // cout << "i: " << i << " | " << "r: " << r << endl;
+            // cout << "next[i] = N + 1" << endl;
+            next[i] = N+1;
             continue;
         }
+
+        // cout << "while loop: " << endl;
+        bool found = false;
         while (l < r) {
+            // cout << "l: " << l << " | r: " << r;
+
             int mid = l + (r - l) / 2;
+
+            // cout << " mid: " << mid << endl;
+
             if (intervals[mid].S == intervals[i].T) { // not possible for S to be lower
+                found = true;
                 next[i] = mid;
                 break;
             } else if (intervals[mid].S > intervals[i].T) { // disjoint but maybe exists earlier S
@@ -75,10 +117,10 @@ int main() {
             }
         }
         // assert interval l is disjoint from interval i; if its not i fked smthn up (pls no)
-        assert(intervals[l].S >= intervals[i].T); 
+        if (!found) assert(intervals[l].S >= intervals[i].T);                                                       // <------------- THIS FAILED!!!!!!!!
         // assert interval l-1 is intersecting with interval i; if its not i fked smthn up (pls no)
-        if (l - 1 >= 0) {assert(intervals[l-1].S < intervals[i].T);}
-        next[i] = l;
+        if (l - 1 >= 0) assert(intervals[l-1].S < intervals[i].T);
+        if (!found) next[i] = l;
     }
 
     // dp[i + L * (N+1)]
@@ -150,10 +192,12 @@ int main() {
         int new_i = par[cur_i + cur_E * (N+1)].parent_i;
         int new_E = par[cur_i + cur_E * (N+1)].parent_E;
         if (par[cur_i + cur_E * (N+1)].include_current) {
-            cout << cur_i;
+            cout << intervals[cur_i].initial_i;
             --K;
             if (K > 0) cout << " ";
         }
+        cur_i = new_i;
+        cur_E = new_E;
     }
     cout << endl;
 }
