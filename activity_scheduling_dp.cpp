@@ -26,16 +26,6 @@ bool activityLeq(Activity a1, Activity a2) {
 }
 
 
-// int knapsack(int i, int E, int N, bool (&visited)[100 * 1500], int (&answer)[100*1500]) {
-//     if (visited[i + E * 100]) return answer[i + E*100];
-//     if (i > N) return 0; // should not be possible?
-//     if (E < 0) return INT_MIN;  // should not be possible?
-
-
-// }
-
-
-
 int main() {
     int N;
     int M;
@@ -66,7 +56,7 @@ int main() {
     sort(intervals+1, intervals + N + 1, activityLeq); // sort by non-decreasing start time
 
 
-
+    M += intervals[1].S;
 
 
     // cout << "sorted:" <<endl;
@@ -131,10 +121,10 @@ int main() {
     
     */
 
-    pair<int, int> *dp = new pair<int, int>[(N + 1) * 931]; // rows is 1 indexed - [1, N] and cols is [0, 930]
-    Triple *par = new Triple[(N+1) * 931];
+    pair<int, int> *dp = new pair<int, int>[(N + 1) * 932]; // rows is 1 indexed - [1, N] and cols is [0, 931]
+    Triple *par = new Triple[(N+1) * 932];
     for (int i = N; i >= 1; --i) {
-        for (int E = 0; E <= 930; ++E) {
+        for (int E = 0; E <= 931; ++E) {
             int do_i = 0;
             int dont_do_i = 0;
             int do_i_K = 0;
@@ -188,7 +178,7 @@ int main() {
 
     int cur_i = 1;
     int cur_E = M;
-    while (cur_i <= N) {
+    while (K > 0) {
         int new_i = par[cur_i + cur_E * (N+1)].parent_i;
         int new_E = par[cur_i + cur_E * (N+1)].parent_E;
         if (par[cur_i + cur_E * (N+1)].include_current) {
