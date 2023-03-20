@@ -110,6 +110,9 @@ int main() {
         return 0;
     }
 
+    // print time
+    cout << dp[get_index(1, C, M, N, C, M)] << endl;
+
     int cur_i = 1;
     int cur_f = C;
     int cur_m = M;
@@ -122,7 +125,7 @@ int main() {
         if (next_i == cur_i) {
             ++fi_counter;
         } else {
-            cout << fi_counter << " "<< endl;
+            cout << fi_counter << " ";
             fi_counter = 0;
         }
         cur_i = next_i;
@@ -131,7 +134,7 @@ int main() {
 
 
         // this mean something broken
-        assert(cur_i!=-1 and cur_f != -1 and cur_m != -1);
+        assert(cur_i!=-1);
     }
 
     // print out refuel at city N (always zero)
