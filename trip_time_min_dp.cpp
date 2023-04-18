@@ -4,6 +4,7 @@
 
 using namespace std;
 
+
 #define TIME_MAX 510001 //  ** max time + 1 **
 
 struct Triple {
