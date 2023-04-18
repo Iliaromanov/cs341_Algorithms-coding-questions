@@ -4,8 +4,8 @@
 
 using namespace std;
 
-
-#define TIME_MAX 510001 //  ** max time + 1 **
+// max time given our restrictions on N, M, and C
+#define TIME_MAX 510001 //  * max time + 1 *
 
 struct Triple {
     // Triple(int i, int f, int m) : i{i}, f{f}, m{m} {}
